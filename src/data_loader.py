@@ -23,11 +23,7 @@ def load_video_paths_and_labels(dataset_folder):
 
         video_paths.append(video)
 
+
+    print(f"🔹 {len(video_paths)} Videos found")
+    print(f"🕺 Bachata: {labels.count(1)} - Salsa: {labels.count(0)}\n")
     return video_paths, labels
-
-
-dataset_folder = paths.DATASET
-video_paths, labels = load_video_paths_and_labels(dataset_folder)
-
-print(f"🔹 {len(video_paths)} Videos found")
-print(f"🕺 Bachata: {labels.count(1)} - Salsa: {labels.count(0)}")
