@@ -1,5 +1,4 @@
 import os
-import paths
 from glob import glob
 
 def load_video_paths_and_labels(dataset_folder):
