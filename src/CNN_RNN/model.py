@@ -7,7 +7,7 @@ class CNN_LSTM(nn.Module):
         super(CNN_LSTM, self).__init__()
 
         # Load pre-trained ResNet
-        self.resnet = models.resnet50(pretrained=True)
+        self.resnet = models.resnet101(weights='IMAGENET1K_V1')
 
         # Remove classification ResNet layer
         self.resnet = nn.Sequential(*list(self.resnet.children())[:-1])
@@ -15,8 +15,8 @@ class CNN_LSTM(nn.Module):
         self.resnet_out_features = 2048  # Feature dimension from ResNet50/ResNet101
 
         # Freezing ResNet params
-        #for param in self.resnet.parameters():
-        #    param.requires_grad = False
+        for param in self.resnet.parameters():
+            param.requires_grad = False
 
         # LSTM
         self.lstm = nn.LSTM(
