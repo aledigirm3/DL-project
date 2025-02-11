@@ -6,7 +6,7 @@ import torch
 from torch.utils.data import DataLoader
 from torchvision import transforms
 from model import CNN_LSTM
-from CNN_RNN.CNN_RNN_process_dataset import DanceDataset
+from CNN_RNN_process_dataset import DanceDataset
 from sklearn.model_selection import train_test_split
 
 current_dir = os.getcwd()
@@ -46,10 +46,12 @@ def evaluate(model, test_dataloader):
     accuracy = 100 * correct / total
     precision = tp / (tp + fp) if (tp + fp) != 0 else 0
     recall = tp / (tp + fn) if (tp + fn) != 0 else 0
+    f1_score = 2 * (precision * recall) / (precision + recall)
 
     print(f"\n-{GREEN}Accuracy: {accuracy:.2f}%{RESET}")
     print(f"\n-{GREEN}Precision: {precision:.2f}{RESET}")
-    print(f"\n-{GREEN}Recall: {recall:.2f}{RESET}\n")
+    print(f"\n-{GREEN}Recall: {recall:.2f}{RESET}")
+    print(f"\n-{GREEN}F1: {f1_score:.2f}{RESET}\n")
 
 # =====================================================================================================
 
