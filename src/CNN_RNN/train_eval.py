@@ -1,8 +1,11 @@
 import sys
 import os
+import time
 import torch.optim as optim
 import torch.nn as nn
 import torch
+import numpy as np
+import random
 from torch.utils.data import DataLoader
 from torchvision import transforms
 from model import CNN_LSTM
@@ -22,6 +25,12 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"{CYAN}{device}{RESET}")
 print(f"Cuda version: {torch.version.cuda}")
 print(f"Torch version: {torch.__version__}\n")
+
+seed = 42
+torch.manual_seed(seed)
+np.random.seed(seed)
+random.seed(seed)
+torch.cuda.manual_seed(seed)
 
 # =====================================================================================================
 
@@ -63,31 +72,45 @@ video_paths, labels = data_loader.load_video_paths_and_labels(f"../{paths.DATASE
 seq_length = 60  # Frames per video
 lstm_hidden_size = 256  # Hidden state LSTM
 num_classes = 2
+bs = 32
+learning_rate = 0.0004
+num_epochs = 30
+
+# Early stopping parameters
+patience = 5
+best_val_loss = float('inf')
+epochs_without_improvement = 0
+best_model_state = None
 
 # Data splits
-video_paths_train, video_paths_test, labels_train, labels_test = train_test_split(
-    video_paths, labels, test_size=0.2, random_state=42
+video_paths_train, video_paths_temp, labels_train, labels_temp = train_test_split(
+    video_paths, labels, test_size=0.3, random_state=seed
 )
+video_paths_val, video_paths_test, labels_val, labels_test = train_test_split(
+    video_paths_temp, labels_temp, test_size=0.5, random_state=seed  # 50% test, 50% validation
+)
+
+#sys.exit(0)
 
 # Dataset and DataLoader
 train_dataset = DanceDataset(video_paths_train, labels_train, transform=transforms.ToTensor(), seq_length=seq_length)
 test_dataset = DanceDataset(video_paths_test, labels_test, transform=transforms.ToTensor(), seq_length=seq_length)
+val_dataset = DanceDataset(video_paths_val, labels_val, transform=transforms.ToTensor(), seq_length=seq_length)
 
-print(f"Number of sequences: {train_dataset.count_sequences() + test_dataset.count_sequences()} (train + test)\n")
+print(f"Number of sequences: {train_dataset.count_sequences() + test_dataset.count_sequences() + val_dataset.count_sequences()} (train + val + test)\n")
 
-#sys.exit(0)
-
-train_dataloader = DataLoader(train_dataset, batch_size=4, shuffle=True)
-test_dataloader = DataLoader(test_dataset, batch_size=4, shuffle=False)
+train_dataloader = DataLoader(train_dataset, batch_size=bs, shuffle=True)
+test_dataloader = DataLoader(test_dataset, batch_size=bs, shuffle=False)
+val_dataloader = DataLoader(val_dataset, batch_size=bs, shuffle=False)
 
 # Model init
 model = CNN_LSTM(seq_length=seq_length, lstm_hidden_size=lstm_hidden_size, num_classes=num_classes)
 model = model.to(device)
-optimizer = optim.Adam(model.parameters(), lr=0.0001)
+optimizer = optim.Adam(model.parameters(), lr=learning_rate)
 criterion = nn.CrossEntropyLoss()  # Loss function
 
 # Train
-num_epochs = 10
+start_time = time.time()
 for epoch in range(num_epochs):
     model.train()
     running_loss = 0.0
@@ -111,6 +134,41 @@ for epoch in range(num_epochs):
 
     print(f"Epoch {epoch+1}/{num_epochs}, Loss: {running_loss / len(train_dataloader)}")
 
+    # Validation phase
+    model.eval()
+    val_loss = 0.0
+    with torch.no_grad():
+        for videos, labels in val_dataloader:
+            videos, labels = videos.to(device), labels.to(device)
+
+            outputs = model(videos)
+            loss = criterion(outputs, labels)
+            val_loss += loss.item()
+
+    val_loss /= len(val_dataloader)
+    print(f"Epoch {epoch+1}/{num_epochs}, Validation Loss: {val_loss}\n")
+
+    # Early stopping logic
+    if val_loss < best_val_loss:
+        best_val_loss = val_loss
+        epochs_without_improvement = 0
+
+        best_model_state = model.state_dict()
+
+    else:
+        epochs_without_improvement += 1
+
+    if epochs_without_improvement >= patience:
+        print(f"Early stopping triggered after {epoch+1} epochs.")
+        break
+
+if best_model_state is not None:
+    model.load_state_dict(best_model_state)
+
 evaluate(model, test_dataloader)
+
+end_time = time.time()
+execution_time = end_time - start_time
+print(f"{CYAN}Execution time: {execution_time / 60} min{RESET}\n")
 
 
