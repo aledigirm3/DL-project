@@ -6,13 +6,17 @@ class CNN_LSTM(nn.Module):
     def __init__(self, seq_length=30, lstm_hidden_size=256, num_classes=2):
         super(CNN_LSTM, self).__init__()
 
-        # Load pre-trained ResNet18
-        self.resnet = models.resnet18(pretrained=True)
+        # Load pre-trained ResNet
+        self.resnet = models.resnet50(pretrained=True)
 
         # Remove classification ResNet layer
         self.resnet = nn.Sequential(*list(self.resnet.children())[:-1])
+        #self.resnet_out_features = 512  # Feature dimension from ResNet18
+        self.resnet_out_features = 2048  # Feature dimension from ResNet50/ResNet101
 
-        self.resnet_out_features = 512  # Feature dimension from ResNet
+        # Freezing ResNet params
+        #for param in self.resnet.parameters():
+        #    param.requires_grad = False
 
         # LSTM
         self.lstm = nn.LSTM(
@@ -32,7 +36,7 @@ class CNN_LSTM(nn.Module):
         for t in range(seq_len):
             frame = x[:, t, :, :, :]
             out = self.resnet(frame)
-            out = out.view(batch_size, -1)  # Flattening
+            out = out.squeeze(-1).squeeze(-1)  # Flattening
             cnn_features.append(out) 
 
         cnn_features = torch.stack(cnn_features, dim=1)  # (B, T, Feature_Size)
