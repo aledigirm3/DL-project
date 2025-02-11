@@ -6,7 +6,7 @@ import torch
 from torch.utils.data import DataLoader
 from torchvision import transforms
 from model import CNN_LSTM
-from process_dataset import DanceDataset
+from CNN_RNN.CNN_RNN_process_dataset import DanceDataset
 from sklearn.model_selection import train_test_split
 
 current_dir = os.getcwd()
@@ -58,7 +58,7 @@ video_paths, labels = data_loader.load_video_paths_and_labels(f"../{paths.DATASE
 
 
 # Params
-seq_length = 30  # Frames per video
+seq_length = 60  # Frames per video
 lstm_hidden_size = 256  # Hidden state LSTM
 num_classes = 2
 
@@ -73,7 +73,7 @@ test_dataset = DanceDataset(video_paths_test, labels_test, transform=transforms.
 
 print(f"Number of sequences: {train_dataset.count_sequences() + test_dataset.count_sequences()} (train + test)\n")
 
-sys.exit(0)
+#sys.exit(0)
 
 train_dataloader = DataLoader(train_dataset, batch_size=4, shuffle=True)
 test_dataloader = DataLoader(test_dataset, batch_size=4, shuffle=False)
