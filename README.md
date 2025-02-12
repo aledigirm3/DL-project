@@ -2,8 +2,8 @@
 Projects for the course Deep Learning at Roma Tre University.
 
 # CNN_RNN Results
-Using ResNet101 + LSTM
-## seq_length = 60, num_epochs = 30 (with patience = 5), lr = 0.0004, batch_size = 32
+Using ResNet101 + LSTM. ResNet weights are frozen for the entire training
+### seq_length = 60, num_epochs = 30 (with patience = 5), lr = 0.0004, batch_size = 32
 ### LOG:
 Early stopping triggered after 10 epochs.
 
