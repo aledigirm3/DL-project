@@ -1,4 +1,3 @@
-import time
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -7,10 +6,14 @@ import torch.optim as optim
 # Train
 def train(model, train_dataloader, val_dataloader, learning_rate, num_epochs, patience, device):
     
+    # Early stopping parameters
+    best_val_loss = float('inf')
+    epochs_without_improvement = 0
+    best_model_state = None
+    
     optimizer = optim.Adam(model.parameters(), lr=learning_rate)
     criterion = nn.CrossEntropyLoss()  # Loss function
     
-    start_time = time.time()
     for epoch in range(num_epochs):
         model.train()
         running_loss = 0.0
@@ -64,5 +67,3 @@ def train(model, train_dataloader, val_dataloader, learning_rate, num_epochs, pa
 
     if best_model_state is not None:
         model.load_state_dict(best_model_state)
-        
-    return model
