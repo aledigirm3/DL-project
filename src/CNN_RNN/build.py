@@ -1,8 +1,6 @@
 import sys
 import os
 import time
-import torch.optim as optim
-import torch.nn as nn
 import torch
 import numpy as np
 import random
@@ -11,8 +9,9 @@ from torchvision import transforms
 from model import CNN_LSTM
 from CNN_RNN_process_dataset import DanceDataset
 from sklearn.model_selection import train_test_split
-from training import train
-from evaluation import evaluate
+from train_eval.training import train
+from train_eval.evaluation import evaluate
+
 
 current_dir = os.getcwd()
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
@@ -20,6 +19,7 @@ import data_loader
 import paths
 from ansi_colors import *
 os.chdir(current_dir)
+
 
 # ===========================================================================================
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -42,9 +42,7 @@ num_classes = 2
 bs = 8
 learning_rate = 0.001
 num_epochs = 40
-
-# Early stopping parameters
-patience = 8
+patience = 8 # Early stopping
 
 
 video_paths, labels = data_loader.load_video_paths_and_labels(f"../{paths.DATASET}")
