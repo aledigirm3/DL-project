@@ -4,7 +4,7 @@ import torch.optim as optim
 
 
 # Train
-def train(model, train_dataloader, val_dataloader, learning_rate, num_epochs, patience, device):
+def train(model, train_dataloader, val_dataloader, learning_rate, num_epochs, patience, device='cpu'):
     
     # Early stopping parameters
     best_val_loss = float('inf')

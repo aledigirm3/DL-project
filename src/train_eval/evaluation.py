@@ -9,7 +9,7 @@ from ansi_colors import *
 os.chdir(current_dir)
 
 
-def evaluate(model, test_dataloader, device):
+def evaluate(model, test_dataloader, device='cpu'):
     model.eval()
     correct, total = 0, 0
     tp_b, fp_b, fn_b = 0, 0, 0 # For bachata
