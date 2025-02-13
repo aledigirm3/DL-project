@@ -37,7 +37,8 @@ torch.cuda.manual_seed(seed)
 def evaluate(model, test_dataloader):
     model.eval()
     correct, total = 0, 0
-    tp, fp, fn = 0, 0, 0 # For bachata
+    tp_b, fp_b, fn_b = 0, 0, 0 # For bachata
+    tp_s, fp_s, fn_s = 0, 0, 0 # For salsa
 
     with torch.no_grad():
         for videos, labels in test_dataloader:
@@ -48,19 +49,46 @@ def evaluate(model, test_dataloader):
             total += labels.size(0)
             correct += (predicted == labels).sum().item()
 
-            tp += ((predicted == 1) & (labels == 1)).sum().item()
-            fp += ((predicted == 1) & (labels == 0)).sum().item() 
-            fn += ((predicted == 0) & (labels == 1)).sum().item()
+            # Bachata
+            tp_b += ((predicted == 1) & (labels == 1)).sum().item()
+            fp_b += ((predicted == 1) & (labels == 0)).sum().item() 
+            fn_b += ((predicted == 0) & (labels == 1)).sum().item()
+
+            # Salsa
+            tp_s += ((predicted == 0) & (labels == 0)).sum().item()
+            fp_s += ((predicted == 0) & (labels == 1)).sum().item() 
+            fn_s += ((predicted == 1) & (labels == 0)).sum().item()
 
     accuracy = 100 * correct / total
-    precision = tp / (tp + fp) if (tp + fp) != 0 else 0
-    recall = tp / (tp + fn) if (tp + fn) != 0 else 0
-    f1_score = 2 * (precision * recall) / (precision + recall)
+    print(f"\n- {GREEN}Accuracy: {accuracy:.2f}%{RESET}")
 
-    print(f"\n-{GREEN}Accuracy: {accuracy:.2f}%{RESET}")
-    print(f"\n-{GREEN}Precision: {precision:.2f}{RESET}")
-    print(f"\n-{GREEN}Recall: {recall:.2f}{RESET}")
-    print(f"\n-{GREEN}F1: {f1_score:.2f}{RESET}\n")
+    # Bachata
+    precision = tp_b / (tp_b + fp_b) if (tp_b + fp_b) != 0 else 0
+    recall = tp_b / (tp_b + fn_b) if (tp_b + fn_b) != 0 else 0
+
+    if (precision + recall) == 0:
+        f1_score = 0
+    else:
+        f1_score = 2 * (precision * recall) / (precision + recall)
+
+    print(f"\n{RED}BACHATA performance metrics:{RESET}")
+    print(f"\n- {GREEN}Precision: {precision:.2f}{RESET}")
+    print(f"\n- {GREEN}Recall: {recall:.2f}{RESET}")
+    print(f"\n- {GREEN}F1: {f1_score:.2f}{RESET}\n")
+
+    # Salsa
+    precision = tp_s / (tp_s + fp_s) if (tp_s + fp_s) != 0 else 0
+    recall = tp_s / (tp_s + fn_s) if (tp_s + fn_s) != 0 else 0
+
+    if (precision + recall) == 0:
+        f1_score = 0
+    else:
+        f1_score = 2 * (precision * recall) / (precision + recall)
+
+    print(f"\n{RED}SALSA performance metrics:{RESET}")
+    print(f"\n- {GREEN}Precision: {precision:.2f}{RESET}")
+    print(f"\n- {GREEN}Recall: {recall:.2f}{RESET}")
+    print(f"\n- {GREEN}F1: {f1_score:.2f}{RESET}\n")
 
 # =====================================================================================================
 
@@ -69,15 +97,15 @@ video_paths, labels = data_loader.load_video_paths_and_labels(f"../{paths.DATASE
 
 
 # Params
-seq_length = 60  # Frames per video
+seq_length = 90  # Frames per video
 lstm_hidden_size = 256  # Hidden state LSTM
 num_classes = 2
-bs = 32
-learning_rate = 0.0004
-num_epochs = 30
+bs = 8
+learning_rate = 0.001
+num_epochs = 40
 
 # Early stopping parameters
-patience = 5
+patience = 8
 best_val_loss = float('inf')
 epochs_without_improvement = 0
 best_model_state = None
@@ -87,8 +115,17 @@ video_paths_train, video_paths_temp, labels_train, labels_temp = train_test_spli
     video_paths, labels, test_size=0.3, random_state=seed
 )
 video_paths_val, video_paths_test, labels_val, labels_test = train_test_split(
-    video_paths_temp, labels_temp, test_size=0.5, random_state=seed  # 50% test, 50% validation
+    video_paths_temp, labels_temp, test_size=0.6, random_state=seed  # 50% test, 50% validation
 )
+
+'''prefix_salsa = "../../salsa_bachata_dataset\\salsa"
+count_salsa = sum(1 for path in video_paths_train if path.startswith(prefix_salsa))
+prefix_bachata = "../../salsa_bachata_dataset\\bachata"
+count_bachata = sum(1 for path in video_paths_train if path.startswith(prefix_bachata))
+
+print(f"Numero di path che iniziano con '{prefix_bachata}': {count_bachata}")
+print(f"Numero di path che iniziano con '{prefix_salsa}': {count_salsa}")'''
+
 
 #sys.exit(0)
 
