@@ -45,9 +45,6 @@ num_epochs = 40
 
 # Early stopping parameters
 patience = 8
-best_val_loss = float('inf')
-epochs_without_improvement = 0
-best_model_state = None
 
 
 video_paths, labels = data_loader.load_video_paths_and_labels(f"../{paths.DATASET}")
@@ -88,8 +85,8 @@ model = model.to(device)
 
 
 start_time = time.time()
-model = train(model, train_dataloader, val_dataloader, num_epochs, patience, device)
 
+train(model, train_dataloader, val_dataloader, num_epochs, patience, device)
 evaluate(model, test_dataloader, device)
 
 end_time = time.time()
