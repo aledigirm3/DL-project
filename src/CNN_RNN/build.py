@@ -9,12 +9,12 @@ from torchvision import transforms
 from model import CNN_LSTM
 from CNN_RNN_process_dataset import DanceDataset
 from sklearn.model_selection import train_test_split
-from train_eval.training import train
-from train_eval.evaluation import evaluate
 
 
 current_dir = os.getcwd()
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from train_eval.training import train
+from train_eval.evaluation import evaluate
 import data_loader
 import paths
 from ansi_colors import *
@@ -84,7 +84,7 @@ model = model.to(device)
 
 start_time = time.time()
 
-train(model, train_dataloader, val_dataloader, num_epochs, patience, device)
+train(model, train_dataloader, val_dataloader, learning_rate, num_epochs, patience, device)
 evaluate(model, test_dataloader, device)
 
 end_time = time.time()
