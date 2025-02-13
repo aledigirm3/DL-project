@@ -9,12 +9,12 @@ import timm
 from torch.utils.data import DataLoader
 from TimeSformer_process_dataset import DanceDataset
 from sklearn.model_selection import train_test_split
-from train_eval.training import train
-from train_eval.evaluation import evaluate
 
 
 current_dir = os.getcwd()
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from train_eval.training import train
+from train_eval.evaluation import evaluate
 import data_loader
 import paths
 from ansi_colors import *
