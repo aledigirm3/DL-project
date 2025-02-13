@@ -3,18 +3,29 @@ Projects for the course Deep Learning at Roma Tre University.
 
 # CNN_RNN Results
 Using ResNet101 + LSTM. ResNet weights are frozen for the entire training
-### seq_length = 60, num_epochs = 30 (patience = 5), lr = 0.0004, batch_size = 32
+### seq_length = 90, num_epochs = 40 (patience = 7), lr = 0.001, batch_size = 8
 ### LOG:
-Early stopping triggered after 10 epochs.
+Early stopping triggered after 22 epochs.
 
-- Accuracy: 66.67%
+- Accuracy: 61.11%
 
-- Precision: 0.67
+# BACHATA performance metrics:
 
-- Recall: 1.00
+- Precision: 0.70
 
-- F1: 0.80
+- Recall: 0.64
 
-Execution time: 13.823362974325816 min
+- F1: 0.67
+
+
+# SALSA performance metrics:
+
+- Precision: 0.50
+
+- Recall: 0.57
+
+- F1: 0.53
+
+Execution time: 47.938197072347 min
 
 (Cuda version: 12.1, Torch version: 2.5.1+cu121)
