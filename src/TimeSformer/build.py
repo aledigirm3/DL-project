@@ -5,7 +5,7 @@ import time
 import numpy as np
 import random
 import torchvision.transforms as transforms
-import timm
+from timesformer.models.vit import TimeSformer
 from torch.utils.data import DataLoader
 from TimeSformer_process_dataset import DanceDataset
 from sklearn.model_selection import train_test_split
@@ -40,10 +40,11 @@ transform = transforms.Compose([
     transforms.ToPILImage(),
     transforms.RandomHorizontalFlip(),
     transforms.ToTensor(),
-    transforms.Normalize([0.5], [0.5])
+    transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])
 ])
 
 # Params
+seq_length = 45  # Frames per video
 bs = 8
 learning_rate = 0.0001
 num_epochs = 40
@@ -61,9 +62,9 @@ video_paths_val, video_paths_test, labels_val, labels_test = train_test_split(
 )
 
 # Dataset and DataLoader
-train_dataset = DanceDataset(video_paths_train, labels_train, transform=transform)
-test_dataset = DanceDataset(video_paths_test, labels_test, transform=transform)
-val_dataset = DanceDataset(video_paths_val, labels_val, transform=transform)
+train_dataset = DanceDataset(video_paths_train, labels_train, seq_length,transform=transform)
+test_dataset = DanceDataset(video_paths_test, labels_test, seq_length, transform=transform)
+val_dataset = DanceDataset(video_paths_val, labels_val, seq_length, transform=transform)
 
 print(f"Number of sequences: {train_dataset.count_sequences() + test_dataset.count_sequences() + val_dataset.count_sequences()} (train + val + test)\n")
 
@@ -72,7 +73,7 @@ test_dataloader = DataLoader(test_dataset, batch_size=bs, shuffle=False)
 val_dataloader = DataLoader(val_dataset, batch_size=bs, shuffle=False)
 
 # Model init
-model = timm.create_model('timesformer_base_patch16_224', pretrained=True, num_classes=2) # Pre-trained on Kinetics-400
+model = TimeSformer(img_size=224, num_classes=2, num_frames=8) # Pre-trained on Kinetics-400
 model = model.to(device)
 
 
