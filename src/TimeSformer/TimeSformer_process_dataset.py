@@ -4,10 +4,10 @@ from torch.utils.data import Dataset
 import cv2
 
 class DanceDataset(Dataset):
-    def __init__(self, video_paths, labels, num_frames=8, transform=None):
+    def __init__(self, video_paths, labels, seq_length=8, transform=None):
         self.video_paths = video_paths
         self.labels = labels
-        self.num_frames = num_frames
+        self.seq_length = seq_length
         self.transform = transform
 
     def __len__(self):
@@ -22,7 +22,7 @@ class DanceDataset(Dataset):
     def load_video(self, path):
         cap = cv2.VideoCapture(path)
         total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
-        frame_indices = np.linspace(0, total_frames-1, self.num_frames, dtype=int)
+        frame_indices = np.linspace(0, total_frames-1, self.seq_length, dtype=int)
         frames = []
         
         for i in frame_indices:
@@ -36,4 +36,15 @@ class DanceDataset(Dataset):
                 frame = self.transform(frame)
             frames.append(frame)
         cap.release()
-        return torch.stack(frames)  # (num_frames, 3, 224, 224)
+        return torch.stack(frames)  # (seq_length, 3, 224, 224)
+    
+    def count_sequences(self):
+        total_sequences = 0
+        for video_path in self.video_paths:
+            cap = cv2.VideoCapture(video_path)
+            frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+            cap.release()
+
+            num_sequences = frame_count // self.seq_length
+            total_sequences += num_sequences
+        return total_sequences
