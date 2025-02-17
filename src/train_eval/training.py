@@ -11,7 +11,7 @@ def train(model, train_dataloader, val_dataloader, learning_rate, num_epochs, pa
     epochs_without_improvement = 0
     best_model_state = None
     
-    optimizer = optim.Adam(model.parameters(), lr=learning_rate)
+    optimizer = optim.AdamW(model.parameters(), lr=learning_rate)
     criterion = nn.CrossEntropyLoss()  # Loss function
     
     for epoch in range(num_epochs):
