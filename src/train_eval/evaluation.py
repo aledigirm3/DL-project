@@ -18,7 +18,9 @@ def evaluate(model, test_dataloader, device='cpu'):
     with torch.no_grad():
         for videos, labels in test_dataloader:
             videos, labels = videos.to(device), labels.to(device)
-            outputs = model(videos)
+            
+            outputs = model(videos).logits
+
             _, predicted = torch.max(outputs, 1)
 
             total += labels.size(0)
