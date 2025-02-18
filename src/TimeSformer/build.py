@@ -5,10 +5,11 @@ import time
 import numpy as np
 import random
 import torchvision.transforms as transforms
-from timesformer.models.vit import TimeSformer
 from torch.utils.data import DataLoader
 from TimeSformer_process_dataset import DanceDataset
 from sklearn.model_selection import train_test_split
+from transformers import AutoModelForVideoClassification, AutoConfig
+
 
 
 current_dir = os.getcwd()
@@ -23,6 +24,7 @@ os.chdir(current_dir)
 
 # ===========================================================================================
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+#device = 'cpu'
 print(f"{CYAN}{device}{RESET}")
 print(f"Cuda version: {torch.version.cuda}")
 print(f"Torch version: {torch.__version__}\n")
@@ -44,9 +46,10 @@ transform = transforms.Compose([
 ])
 
 # Params
-seq_length = 45  # Frames per video
+seq_length = 30  # Frames per video
 bs = 8
-learning_rate = 0.0001
+num_classes = 2
+learning_rate = 0.00003
 num_epochs = 40
 patience = 8 # Early stopping
 
@@ -72,8 +75,18 @@ train_dataloader = DataLoader(train_dataset, batch_size=bs, shuffle=True)
 test_dataloader = DataLoader(test_dataset, batch_size=bs, shuffle=False)
 val_dataloader = DataLoader(val_dataset, batch_size=bs, shuffle=False)
 
-# Model init
-model = TimeSformer(img_size=224, num_classes=2, num_frames=8) # Pre-trained on Kinetics-400
+
+config = AutoConfig.from_pretrained('facebook/timesformer-base-finetuned-k400')
+config.num_frames = seq_length
+config.num_labels = num_classes
+
+ # Pre-trained on Kinetics-400
+model = AutoModelForVideoClassification.from_pretrained(
+    'facebook/timesformer-base-finetuned-k400',
+    config=config,
+    ignore_mismatched_sizes=True
+    )
+
 model = model.to(device)
 
 
