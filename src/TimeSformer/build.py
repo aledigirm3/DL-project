@@ -24,7 +24,7 @@ os.chdir(current_dir)
 
 # ===========================================================================================
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-#device = 'cpu'
+
 print(f"{CYAN}{device}{RESET}")
 print(f"Cuda version: {torch.version.cuda}")
 print(f"Torch version: {torch.__version__}\n")
@@ -40,18 +40,22 @@ torch.cuda.manual_seed(seed)
 # Data augmentation
 transform = transforms.Compose([
     transforms.ToPILImage(),
-    transforms.RandomHorizontalFlip(),
+    transforms.ColorJitter(brightness=0.2,
+                           contrast=0.2,
+                           saturation=0.2,
+                           hue=0.2),      
+    transforms.GaussianBlur(kernel_size=3),
     transforms.ToTensor(),
     transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])
 ])
 
 # Params
-seq_length = 30  # Frames per video
-bs = 8
+seq_length = 45  # Frames per video
+bs = 16
 num_classes = 2
-learning_rate = 0.00003
+learning_rate = 0.00006
 num_epochs = 40
-patience = 8 # Early stopping
+patience = 7 # Early stopping
 
 
 video_paths, labels = data_loader.load_video_paths_and_labels(f"../{paths.DATASET}")
@@ -86,6 +90,21 @@ model = AutoModelForVideoClassification.from_pretrained(
     config=config,
     ignore_mismatched_sizes=True
     )
+
+
+for param in model.parameters():
+    param.requires_grad = False  # Freeze layers
+
+# Unfreeze classification layer
+for param in model.classifier.parameters():
+    param.requires_grad = True
+
+
+for name, param in list(model.named_parameters())[-12:]:  # Unfreeze layers for fine-tuning
+    param.requires_grad = True
+    print(f"\n {CYAN} UNFREEZED PARAMS:{RESET} {name}")
+
+#sys.exit(0)
 
 model = model.to(device)
 
