@@ -49,7 +49,7 @@ transform = transforms.Compose([
 seq_length = 45  # Frames per video
 bs = 16
 num_classes = 2
-learning_rate = 0.00006
+learning_rate = 0.0006
 num_epochs = 40
 patience = 7 # Early stopping
 
