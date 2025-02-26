@@ -39,16 +39,12 @@ torch.cuda.manual_seed(seed)
 
 # Data augmentation
 transform = transforms.Compose([
-    transforms.ToPILImage(),
-    transforms.ColorJitter(brightness=0.2,
-                           contrast=0.2,
-                           saturation=0.2,
-                           hue=0.2),      
-    transforms.GaussianBlur(kernel_size=3),
+    #transforms.ToPILImage(),
+    #transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.2),      
+    #transforms.GaussianBlur(kernel_size=3),
     transforms.ToTensor(),
     transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])
 ])
-
 # Params
 seq_length = 45  # Frames per video
 bs = 16
@@ -100,7 +96,7 @@ for param in model.classifier.parameters():
     param.requires_grad = True
 
 
-for name, param in list(model.named_parameters())[-12:]:  # Unfreeze layers for fine-tuning
+for name, param in list(model.named_parameters())[-6:]:  # Unfreeze layers for fine-tuning
     param.requires_grad = True
     print(f"\n {CYAN} UNFREEZED PARAMS:{RESET} {name}")
 
