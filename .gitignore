@@ -175,3 +175,4 @@ docs/source/contributing.md
 
 # Video
 *.mp4
+src/TimesNet/yolov8n-pose.pt
