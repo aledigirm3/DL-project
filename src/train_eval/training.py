@@ -27,7 +27,7 @@ def train(model, train_dataloader, val_dataloader, learning_rate, num_epochs, pa
             outputs = model(videos)
             
             # Compute loss
-            loss = criterion(outputs.logits, labels) # (outputs.logits -> TimeSformer; outputs CNN_RNN)
+            loss = criterion(outputs, labels) # (outputs.logits -> TimeSformer)
             
             # Backpropagation
             loss.backward()
@@ -45,7 +45,7 @@ def train(model, train_dataloader, val_dataloader, learning_rate, num_epochs, pa
                 videos, labels = videos.to(device), labels.to(device)
 
                 outputs = model(videos)
-                loss = criterion(outputs.logits, labels) # (outputs.logits -> TimeSformer; outputs CNN_RNN)
+                loss = criterion(outputs, labels) # (outputs.logits -> TimeSformer)
                 val_loss += loss.item()
 
         val_loss /= len(val_dataloader)

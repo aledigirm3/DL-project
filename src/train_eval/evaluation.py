@@ -19,7 +19,7 @@ def evaluate(model, test_dataloader, device='cpu'):
         for videos, labels in test_dataloader:
             videos, labels = videos.to(device), labels.to(device)
             
-            outputs = model(videos).logits
+            outputs = model(videos) # (outputs.logits -> TimeSformer)
 
             _, predicted = torch.max(outputs, 1)
 
