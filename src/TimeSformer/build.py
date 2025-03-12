@@ -107,7 +107,7 @@ model = model.to(device)
 
 start_time = time.time()
 
-train(model, train_dataloader, val_dataloader, learning_rate, num_epochs, patience, device)
+train(model, train_dataloader, val_dataloader, learning_rate, num_epochs, patience, device, needDotLogits=True)
 evaluate(model, test_dataloader, device)
 
 end_time = time.time()

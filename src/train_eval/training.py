@@ -4,7 +4,7 @@ import torch.optim as optim
 
 
 # Train
-def train(model, train_dataloader, val_dataloader, learning_rate, num_epochs, patience, device='cpu'):
+def train(model, train_dataloader, val_dataloader, learning_rate, num_epochs, patience, device='cpu', needDotLogits=False):
     
     # Early stopping parameters
     best_val_loss = float('inf')
@@ -23,8 +23,11 @@ def train(model, train_dataloader, val_dataloader, learning_rate, num_epochs, pa
             videos, labels = videos.to(device), labels.to(device)
 
             optimizer.zero_grad()  # Reset gradients
-
-            outputs = model(videos)
+            
+            if needDotLogits:
+                outputs = model(videos)
+            else:
+                outputs = model(videos).logits
             
             # Compute loss
             loss = criterion(outputs, labels) # (outputs.logits -> TimeSformer)
@@ -43,8 +46,13 @@ def train(model, train_dataloader, val_dataloader, learning_rate, num_epochs, pa
         with torch.no_grad():
             for videos, labels in val_dataloader:
                 videos, labels = videos.to(device), labels.to(device)
-
-                outputs = model(videos)
+                
+                if needDotLogits:
+                    outputs = model(videos)
+                else:
+                    outputs = model(videos).logits
+                
+                
                 loss = criterion(outputs, labels) # (outputs.logits -> TimeSformer)
                 val_loss += loss.item()
 
