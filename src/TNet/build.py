@@ -15,21 +15,19 @@ from train_eval.evaluation import evaluate
 from ansi_colors import *
 os.chdir(current_dir)
 
-timesnet_path = os.getenv('TIMESNET_PATH') # TO FIX
 
-timesnet_path = 'C:/Users/aless/dev/package/Time-Series-Library'
+timesnet_path = '../../Time-Series-Library'
 
 if timesnet_path:
     sys.path.append(timesnet_path)
 
 else:
-    print(f"\n{RED}(user) TimesNet path not found{RESET}\n")
+    print(f"\n{RED}TimesNet path not found{RESET}\n")
     sys.exit(0)
 from models.TimesNet import Model # type: ignore
 
 class Config:
     def __init__(self, **kwargs):
-        # Imposta ogni parametro come attributo della classe
         for key, value in kwargs.items():
             setattr(self, key, value)
 
@@ -145,14 +143,14 @@ configs_dict = {
     'label_len': 30,                   # 
     'pred_len': 0,                     # There are no predictions (classification)
     'e_layers': 1,                     # TimesNet blocks
-    'enc_in': num_features,            # Numero di ingressi nel modello
+    'enc_in': num_features,            # N. inputs of model
     'd_model': 256,                    # Model size
-    'd_ff': 512,                       # (2 d_model)
-    'c_out': 2,                        # Numero di output del modello
+    'd_ff': 512,                       # (2 * d_model)
+    'c_out': 2,                        # N. outputs of modello
     'embed': 'learned',                # Embedding ('fixed' o 'learned')
     'freq': 's',                       # (second)
     'dropout': 0.1,
-    'num_class': 2,                    # Numero di classi per la classificazione
+    'num_class': 2,                    # N. of classes for classification
     'top_k': 3,
     'num_kernels': 8,
 }
@@ -165,7 +163,7 @@ model = model.to(device)
 print(f"{CYAN}{model}{RESET}")
 
 train(model, train_dataloader, val_dataloader, learning_rate, num_epochs, patience, device=device, needDotLogits=False, isTnet=True)
-evaluate(model, test_dataloader, device='cpu', needDotLogits=False, isTnet=True)
+evaluate(model, test_dataloader, device=device, needDotLogits=False, isTnet=True)
 
 
 
