@@ -4,7 +4,7 @@ import torch.optim as optim
 
 
 # Train
-def train(model, train_dataloader, val_dataloader, learning_rate, num_epochs, patience, device='cpu', needDotLogits=False):
+def train(model, train_dataloader, val_dataloader, learning_rate, num_epochs, patience, device='cpu', needDotLogits=False, isTnet=False):
     
     # Early stopping parameters
     best_val_loss = float('inf')
@@ -24,13 +24,20 @@ def train(model, train_dataloader, val_dataloader, learning_rate, num_epochs, pa
 
             optimizer.zero_grad()  # Reset gradients
             
-            if needDotLogits:
-                outputs = model(videos)
+            if not needDotLogits:
+                if isTnet:
+                    batch_size, seq_length, num_features = videos.shape
+                    x_mark_enc = torch.arange(seq_length).float()
+                    x_mark_enc = x_mark_enc.repeat(batch_size, 1)
+                    x_mark_enc = x_mark_enc.to(device)
+                    outputs = model(videos, x_mark_enc, None, None)
+                else:
+                    outputs = model(videos)
             else:
                 outputs = model(videos).logits
             
             # Compute loss
-            loss = criterion(outputs, labels) # (outputs.logits -> TimeSformer)
+            loss = criterion(outputs, labels)
             
             # Backpropagation
             loss.backward()
@@ -47,13 +54,20 @@ def train(model, train_dataloader, val_dataloader, learning_rate, num_epochs, pa
             for videos, labels in val_dataloader:
                 videos, labels = videos.to(device), labels.to(device)
                 
-                if needDotLogits:
-                    outputs = model(videos)
+                if not needDotLogits:
+                    if isTnet:
+                        batch_size, seq_length, num_features = videos.shape
+                        x_mark_enc = torch.arange(seq_length).float()
+                        x_mark_enc = x_mark_enc.repeat(batch_size, 1)
+                        x_mark_enc = x_mark_enc.to(device)
+                        outputs = model(videos, x_mark_enc, None, None)
+                    else:
+                        outputs = model(videos)
                 else:
                     outputs = model(videos).logits
                 
                 
-                loss = criterion(outputs, labels) # (outputs.logits -> TimeSformer)
+                loss = criterion(outputs, labels)
                 val_loss += loss.item()
 
         val_loss /= len(val_dataloader)

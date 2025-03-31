@@ -9,7 +9,7 @@ from ansi_colors import *
 os.chdir(current_dir)
 
 
-def evaluate(model, test_dataloader, device='cpu', needDotLogits=False):
+def evaluate(model, test_dataloader, device='cpu', needDotLogits=False, isTnet = False):
     model.eval()
     correct, total = 0, 0
     tp_b, fp_b, fn_b = 0, 0, 0 # For bachata
@@ -19,8 +19,15 @@ def evaluate(model, test_dataloader, device='cpu', needDotLogits=False):
         for videos, labels in test_dataloader:
             videos, labels = videos.to(device), labels.to(device)
             
-            if needDotLogits:
-                outputs = model(videos) # (outputs.logits -> TimeSformer)
+            if not needDotLogits:
+                if isTnet:
+                    batch_size, seq_length, num_features = videos.shape
+                    x_mark_enc = torch.arange(seq_length).float()
+                    x_mark_enc = x_mark_enc.repeat(batch_size, 1)
+                    x_mark_enc = x_mark_enc.to(device)
+                    outputs = model(videos, x_mark_enc, None, None)
+                else:
+                    outputs = model(videos) # (outputs.logits -> TimeSformer)
             else:
                 outputs = model(videos)
 
