@@ -1,12 +1,9 @@
-import pandas as pd
-import numpy as np
 import torch
-from torch.utils.data import TensorDataset, DataLoader, random_split
+from torch.utils.data import DataLoader
 import sys
 import os
-from tqdm import tqdm
-import torch.nn as nn
 from collections import Counter
+from prep_data import build_tensor_dataset
 
 current_dir = os.getcwd()
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
@@ -55,62 +52,14 @@ learning_rate = 0.001
 num_epochs = 40
 patience = 5 # Early stopping
 
-X_windows = []
-y_labels = []
-total_windows = 0
+num_features = 34
 
-for file in tqdm(os.listdir(dataset_folder), desc="Processing files", unit="file"):
-    if file.endswith(".csv"):
-        file_path = os.path.join(dataset_folder, file)
-
-        df = pd.read_csv(file_path)
-        num_features = (df.shape[1] - 3)  # Exclude video_id, frame, label
-
-        # Sliding windows
-        for i in range(0, len(df), window_size):  
-            window = df.iloc[i:i+window_size, 2:-1].values.astype(np.float32)
-            total_windows += 1
-
-            if len(window) != 30:
-                print(len(window))
-                print(f"\n{RED}ERROR: window size != {window_size} {RESET}")
-                sys.exit(0)
-                
-                
-            label = df.iloc[i, -1]
-            X_windows.append(window)
-            y_labels.append(label)
-
-print(f"\n{CYAN}Total windows: {total_windows}{RESET}")
-
-
-# To numpy array
-X_windows = np.array(X_windows)
-y_labels = np.array(y_labels)
-
-# Dataset shuffle
-indices = np.random.permutation(len(X_windows))  # Random permutation of indices
-X_windows = X_windows[indices]
-y_labels = y_labels[indices]
-
-
-# To PyTorch tensor
-X_tensor = torch.tensor(X_windows, dtype=torch.float32)  # Shape: (num_seq, 30, num_features)
-y_tensor = torch.tensor(y_labels, dtype=torch.long)  # Shape: (num_seq,)
-
-
-print("Shape X:", X_tensor.shape)  # (num_seq, 30, num_features)
-print("Shape y:", y_tensor.shape)  # (num_seq,)
-
-# Build PyTorch datasets (train/val/test)
-dataset = TensorDataset(X_tensor, y_tensor)
-
-total_size = len(dataset)
-train_size = int(0.7 * total_size)
-val_size = int(0.15 * total_size)
-test_size = total_size - train_size - val_size
-
-train_dataset, val_dataset, test_dataset = random_split(dataset, [train_size, val_size, test_size])
+print(f"{GREEN}TRAIN{RESET}")
+train_dataset = build_tensor_dataset(dataset_folder + 'train', window_size)
+print(f"{GREEN}VAL{RESET}")
+val_dataset = build_tensor_dataset(dataset_folder + 'val', window_size)
+print(f"{GREEN}TEST{RESET}")
+test_dataset = build_tensor_dataset(dataset_folder + 'test', window_size)
 
 train_counts = count_labels(train_dataset)
 val_counts = count_labels(val_dataset)
@@ -142,11 +91,11 @@ configs_dict = {
     'seq_len': window_size,            # input seq.
     'label_len': 30,                   # 
     'pred_len': 0,                     # There are no predictions (classification)
-    'e_layers': 1,                     # TimesNet blocks
+    'e_layers': 2,                     # TimesNet blocks
     'enc_in': num_features,            # N. inputs of model
-    'd_model': 256,                    # Model size
-    'd_ff': 512,                       # (2 * d_model)
-    'c_out': 2,                        # N. outputs of modello
+    'd_model': 64,                    # Model size
+    'd_ff': 128,                       # (2 * d_model)
+    'c_out': 2,                        # N. outputs of model
     'embed': 'learned',                # Embedding ('fixed' o 'learned')
     'freq': 's',                       # (second)
     'dropout': 0.1,
