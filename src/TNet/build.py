@@ -50,7 +50,7 @@ bs = 16
 num_classes = 2
 learning_rate = 0.001
 num_epochs = 40
-patience = 5 # Early stopping
+patience = 6 # Early stopping
 
 num_features = 34
 
@@ -91,16 +91,16 @@ configs_dict = {
     'seq_len': window_size,            # input seq.
     'label_len': 30,                   # 
     'pred_len': 0,                     # There are no predictions (classification)
-    'e_layers': 2,                     # TimesNet blocks
+    'e_layers': 3,                     # TimesNet blocks
     'enc_in': num_features,            # N. inputs of model
-    'd_model': 64,                    # Model size
-    'd_ff': 128,                       # (2 * d_model)
+    'd_model': 128,                    # Model size
+    'd_ff': 256,                       # (2 * d_model)
     'c_out': 2,                        # N. outputs of model
     'embed': 'learned',                # Embedding ('fixed' o 'learned')
     'freq': 's',                       # (second)
     'dropout': 0.1,
     'num_class': 2,                    # N. of classes for classification
-    'top_k': 3,
+    'top_k': 5,
     'num_kernels': 8,
 }
 

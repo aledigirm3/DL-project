@@ -78,7 +78,7 @@ def train(model, train_dataloader, val_dataloader, learning_rate, num_epochs, pa
             best_val_loss = val_loss
             epochs_without_improvement = 0
 
-            best_model_state = model.state_dict()
+            #best_model_state = model.state_dict()
 
         else:
             epochs_without_improvement += 1
